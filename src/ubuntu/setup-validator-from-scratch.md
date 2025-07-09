@@ -9,7 +9,7 @@ sudo apt-get update
 ### Install pre-requisites
 
 ```
-sudo apt install dnsutils -y
+sudo apt install -y dnsutils software-properties-common git
 ```
 
 The node uses ```dig``` to get external IP for autoconfig during the installation process
@@ -70,15 +70,6 @@ Go to your home directory and clone the node repository. Later we will use this 
 ```
 cd ~
 
-git clone git://github.com/CasperLabs/casper-node.git
+git clone https://github.com/casper-network/casper-node.git
 cd casper-node/
-```
-
-[include checkout-release-branch.md]
-
-#### Build the contracts
-
-```
-make setup-rs
-make build-client-contracts -j
 ```

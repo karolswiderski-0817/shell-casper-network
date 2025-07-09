@@ -6,20 +6,26 @@
 
 [include setup-validator-from-scratch.md]
 
+[include checkout-release-branch-mainnet.md]
+
+[include build-the-contracts.md]
+
 ## Generate keys and fund your account 
 
 ### Generate node keys
 
 [include generate-keys.md]
 
-### Create account
-
-[include ../clarity/create-mainnet-account.md]
-
 ### Fund account
 
-[include ../clarity/fund-mainnet-account.md]
+[include ../fund-mainnet-account.md]
 
-[include run-node.md]
+[include configure-node.md]
+
+[include stage-upgrade-mainnet.md]
+
+[include start-node.md]
+
+[include monitor-node-status.md]
 
 [include bond.md]

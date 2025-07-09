@@ -52,7 +52,7 @@ sudo apt-get update
 ### Install pre-requisites
 
 ```
-sudo apt install dnsutils -y
+sudo apt install -y dnsutils software-properties-common git
 ```
 
 The node uses ```dig``` to get external IP for autoconfig during the installation process
@@ -84,7 +84,7 @@ sudo rm -rf /var/lib/casper/*
 
 Execute the following in order to add the Casper repository to `apt` in Ubuntu. 
 ```shell
-echo "deb https://repo.casperlabs.io/releases" bionic main | sudo tee -a /etc/apt/sources.list.d/casper.list
+echo "deb [arch=amd64] https://repo.casperlabs.io/releases" bionic main | sudo tee -a /etc/apt/sources.list.d/casper.list
 curl -O https://repo.casperlabs.io/casper-repo-pubkey.asc
 sudo apt-key add casper-repo-pubkey.asc
 sudo apt update
@@ -135,7 +135,7 @@ Go to your home directory and clone the node repository. Later we will use this 
 ```
 cd ~
 
-git clone git://github.com/CasperLabs/casper-node.git
+git clone https://github.com/casper-network/casper-node.git
 cd casper-node/
 ```
 
@@ -146,7 +146,7 @@ cd casper-node/
 > installed.
 
 ```
-git checkout release-1.0.0
+git checkout release-1.4.5
 ```
 
 #### Build the contracts
@@ -178,13 +178,9 @@ It will create three files in the ```/etc/casper/validator_keys``` directory:
 
 Save your keys to a safe place. 
 
-### Create account
-
-Go to [Clarity](https://clarity.make.services/#/accounts) and login using your Github or Google account. Click the "Import Key" button a select you public key file ```public_key.pem```. Do NOT, EVER, upload your private key. Give it a name and hit "Save".  
-
 ### Fund account
 
-To fund an account visit the [Faucet](https://clarity.make.services/#/faucet) page. Select the account you want to fund and hit "Request Tokens". Wait until the request transaction succeeds.
+To fund an account, send tokens (from an exchange or from another account on the network) to it, by using the content of the `public_key_hex` file as the recipient address. Wait until the transaction succeeds.
 
 ## Configure and Run the Node
 
@@ -220,8 +216,99 @@ Get the trusted hash from the network:
 
 ```
 # Get trusted_hash into config.toml
-TRUSTED_HASH=$(curl -s $KNOWN_VALIDATOR_IP:8888/status | jq -r .last_added_block_info.hash | tr -d '\n')
+while read -r KNOWN_VALIDATOR_IP; do TRUSTED_HASH=$(timeout 2 casper-client get-block --node-address http://$KNOWN_VALIDATOR_IP:7777 -b 20 | jq -r .result.block.hash | tr -d '\n'); if [[ ! -z "$TRUSTED_HASH" ]]; then break; fi; done <<< "$KNOWN_VALIDATOR_IPS"
+
 if [ "$TRUSTED_HASH" != "null" ]; then sudo -u casper sed -i "/trusted_hash =/c\trusted_hash = '$TRUSTED_HASH'" /etc/casper/$CASPER_VERSION/config.toml; fi
+```
+
+### Stage the upgrades
+"Staging an upgrade" is a process in which you tell your node to download the upgrade files and prepare them, so that they can automatically be applied at the pre-defined activation point. Stage all of the following upgrades from the oldest to the newest (from the top to the bottom).
+
+#### Upgrade to casper-node v1.1.1
+For this upgrade, to `casper-node v1.1.1`, the activation point is `Era 347`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time. You may see the [details of the upgrade on GitHub](https://github.com/casper-network/casper-node/releases/tag/v1.1.1).
+
+Execute the following command to download and stage the upgrade:
+```
+curl -sSf genesis.casperlabs.io/casper/1_1_0/stage_1_1_0_upgrade.sh | sudo bash
+```
+
+#### Upgrade to casper-node v1.1.2
+For this upgrade, to `casper-node v1.1.2`, the activation point is `Era 574`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time. You may see the [details of the upgrade on GitHub](https://github.com/casper-network/casper-node/releases/tag/v1.1.2).
+
+Execute the following command to download and stage the upgrade:
+```
+curl -sSf genesis.casperlabs.io/casper/1_1_2/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.2.0
+For this upgrade, to `casper-node v1.2.0`, the activation point is `Era 694`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+curl -sSf genesis.casperlabs.io/casper/1_2_0/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.2.1
+For this upgrade, to `casper-node v1.2.1`, the activation point is `Era 1281`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+curl -sSf genesis.casperlabs.io/casper/1_2_1/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.3.2
+For this upgrade, to `casper-node v1.3.2`, the activation point is `Era 1605`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_3_2/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.3.4
+For this upgrade, to `casper-node v1.3.4`, the activation point is `Era 2193`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_3_4/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.4.1
+For this upgrade, to `casper-node v1.4.1`, the activation point is `Era 2600`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_4_1/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.4.3
+For this upgrade, to `casper-node v1.4.3`, the activation point is `Era 3111`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_4_3/stage_upgrade.sh | sudo bash -
+```
+#### Upgrade to casper-node v1.4.4
+For this upgrade, to `casper-node v1.4.4`, the activation point is `Era 3435`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_4_4/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.4.5
+For this upgrade, to `casper-node v1.4.5`, the activation point is `Era 4417`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_4_5/stage_upgrade.sh | sudo bash -
+```
+
+#### Upgrade to casper-node v1.4.6
+For this upgrade, to `casper-node v1.4.6`, the activation point is `Era 4968`. You have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following command to download and stage the upgrade:
+```
+cd ~; curl -sSf genesis.casperlabs.io/casper/1_4_6/stage_upgrade.sh | sudo bash -
 ```
 
 ### Start the node
@@ -300,7 +387,7 @@ sudo -u casper casper-client put-deploy \
     --node-address "http://127.0.0.1:7777/" \
     --secret-key "/etc/casper/validator_keys/secret_key.pem" \
     --session-path "$HOME/casper-node/target/wasm32-unknown-unknown/release/add_bid.wasm" \
-    --payment-amount 3000000000 \
+    --payment-amount 5500000000 \
     --gas-price=1 \
     --session-arg=public_key:"public_key='$PUBLIC_KEY_HEX'" \
     --session-arg=amount:"u512='900000000000'" \

@@ -10,6 +10,10 @@
 
 [include setup-validator-from-scratch.md]
 
+[include checkout-release-branch-testnet.md]
+
+[include build-the-contracts.md]
+
 ## Generate keys and fund your account 
 
 ### Generate node keys
@@ -18,13 +22,19 @@
 
 ### Create account
 
-[include ../clarity/create-testnet-account.md]
+[include ../testnet/create-testnet-account.md]
 
 ### Fund account
 
-[include ../clarity/fund-testnet-account.md]
+[include ../testnet/fund-testnet-account.md]
 
-[include run-node.md]
+[include configure-node.md]
+
+[include stage-upgrade.md]
+
+[include start-node.md]
+
+[include monitor-node-status.md]
 
 [include bond.md]
 

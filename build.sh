@@ -22,11 +22,30 @@ files=(
     src/aws/setup-testnet-validator-from-scratch.md
     src/ubuntu/setup-mainnet-validator-from-scratch.md
     src/ubuntu/setup-testnet-validator-from-scratch.md
-    src/ubuntu/reinstall-testnet-validator.md
-    src/faq.md
+    src/faq-user.md
+    src/faq-validator.md
     src/testnet.md
     src/testnet-rewards.md
     src/testnet/upgrade-1_1_0.md
+    src/testnet/upgrade-1_1_2.md
+    src/testnet/upgrade-1_2_0.md
+    src/testnet/upgrade-1_2_1.md
+    src/testnet/upgrade-1_3_1.md
+    src/testnet/upgrade-1_3_2.md
+    src/testnet/upgrade-1_3_4.md
+    src/testnet/upgrade-1_4_1.md
+    src/testnet/upgrade-1_4_2.md
+    src/testnet/upgrade-1_4_3.md
+    src/testnet/upgrade-1_4_4.md
+    src/testnet/upgrade-1_4_5.md
+    src/testnet/upgrade-1_4_6.md
+    src/testnet/upgrade-1_4_7.md
+    src/testnet/upgrade-1_4_8.md
+    src/user-guides/SignerGuide.md
+    src/user-guides/Connect-a-Wallet.md
+    src/user-guides/Transfer-CSPR.md
+    src/user-guides/Delegating-CSPR-Stake.md
+    src/user-guides/Undelegating-CSPR-Stake.md
 )
 
 for file in ${files[*]}

@@ -5,7 +5,7 @@
 > the [Test Net Code of Conduct and Incentive Requirements](../testnet.md). Failure to do so may reduce or fully 
 > disqualify any Test Net incentive participation.
 > 
-> Before you set up your node, make sure it conforms to the minimum [Recommended Hardware Specifications](https://docs.casperlabs.io/en/latest/node-operator/hardware.html)
+> Before you set up your node, make sure it conforms to the minimum [Recommended Hardware Specifications](https://docs.casperlabs.io/operators/hardware/)
 
 
 ## Create security group 
@@ -32,7 +32,7 @@ Create elastic IP and assign it to the instance
 > the [Test Net Code of Conduct and Incentive Requirements](../testnet.md). Failure to do so may reduce or fully 
 > disqualify any Test Net incentive participation.
 > 
-> Before you set up your node, make sure it conforms to the minimum [Recommended Hardware Specifications](https://docs.casperlabs.io/en/latest/node-operator/hardware.html)
+> Before you set up your node, make sure it conforms to the minimum [Recommended Hardware Specifications](https://docs.casperlabs.io/operators/hardware/)
 
 
 > ### Note  
@@ -74,7 +74,7 @@ sudo apt-get update
 ### Install pre-requisites
 
 ```
-sudo apt install dnsutils -y
+sudo apt install -y dnsutils software-properties-common git
 ```
 
 The node uses ```dig``` to get external IP for autoconfig during the installation process
@@ -106,7 +106,7 @@ sudo rm -rf /var/lib/casper/*
 
 Execute the following in order to add the Casper repository to `apt` in Ubuntu. 
 ```shell
-echo "deb https://repo.casperlabs.io/releases" bionic main | sudo tee -a /etc/apt/sources.list.d/casper.list
+echo "deb [arch=amd64] https://repo.casperlabs.io/releases" bionic main | sudo tee -a /etc/apt/sources.list.d/casper.list
 curl -O https://repo.casperlabs.io/casper-repo-pubkey.asc
 sudo apt-key add casper-repo-pubkey.asc
 sudo apt update
@@ -157,7 +157,7 @@ Go to your home directory and clone the node repository. Later we will use this 
 ```
 cd ~
 
-git clone git://github.com/CasperLabs/casper-node.git
+git clone https://github.com/casper-network/casper-node.git
 cd casper-node/
 ```
 
@@ -168,7 +168,7 @@ cd casper-node/
 > installed.
 
 ```
-git checkout release-1.0.0
+git checkout release-1.4.6
 ```
 
 #### Build the contracts
@@ -202,11 +202,11 @@ Save your keys to a safe place.
 
 ### Create account
 
-Go to [Clarity](https://clarity-testnet.make.services/#/accounts) and login using your Github or Google account. Click the "Import Key" button a select you public key file ```public_key.pem```. Do NOT, EVER, upload your private key. Give it a name and hit "Save".  
+Install the Signer app, and import your `secret_key.pem` file following the steps described under the `New User (Has Secret Keys)` section of the [Signer Guide](https://docs.cspr.community/docs/user-guides/SignerGuide.html).
 
 ### Fund account
 
-To fund an account visit the [Faucet](https://clarity-testnet.make.services/#/faucet) page. Select the account you want to fund and hit "Request Tokens". Wait until the request transaction succeeds.
+Go to [Testnet CSPR.Live](https://testnet.cspr.live/), and [connect](https://docs.cspr.community/docs/user-guides/Connect-a-Wallet.html) with the account you want to fund. Click `Tools` from the top navigation menu, then click `Faucet`. Wait for the faucet page to load, and click the `Request tokens` button. Wait until the request transaction succeeds.
 
 ## Configure and Run the Node
 
@@ -242,8 +242,147 @@ Get the trusted hash from the network:
 
 ```
 # Get trusted_hash into config.toml
-TRUSTED_HASH=$(curl -s $KNOWN_VALIDATOR_IP:8888/status | jq -r .last_added_block_info.hash | tr -d '\n')
+while read -r KNOWN_VALIDATOR_IP; do TRUSTED_HASH=$(timeout 2 casper-client get-block --node-address http://$KNOWN_VALIDATOR_IP:7777 -b 20 | jq -r .result.block.hash | tr -d '\n'); if [[ ! -z "$TRUSTED_HASH" ]]; then break; fi; done <<< "$KNOWN_VALIDATOR_IPS"
+
 if [ "$TRUSTED_HASH" != "null" ]; then sudo -u casper sed -i "/trusted_hash =/c\trusted_hash = '$TRUSTED_HASH'" /etc/casper/$CASPER_VERSION/config.toml; fi
+```
+
+### Stage the upgrades
+"Staging an upgrade" is a process in which you tell your node to download the upgrade files and prepare them, so that they can automatically be applied at the pre-defined activation point. Stage all of the following upgrades from the
+oldest to the newest (from the top to the bottom).
+
+#### Upgrade to casper-node v1.1.0
+For this upgrade, to `casper-node v1.1.0`, the activation point is `Era 166`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_1_0
+sudo -u casper /etc/casper/config_from_example.sh 1_1_0
+```
+
+#### Upgrade to casper-node v1.1.2
+For this upgrade, to `casper-node v1.1.2`, the activation point is `Era 388`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_1_2
+sudo -u casper /etc/casper/config_from_example.sh 1_1_2
+```
+
+#### Upgrade to casper-node v1.2.0
+For this upgrade, to `casper-node v1.2.0`, the activation point is `Era 490`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_2_0
+sudo -u casper /etc/casper/config_from_example.sh 1_2_0
+```
+
+#### Upgrade to casper-node v1.2.1
+For this upgrade, to `casper-node v1.2.1`, the activation point is `Era 1143`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_2_1
+sudo -u casper /etc/casper/config_from_example.sh 1_2_1
+```
+
+#### Upgrade to casper-node v1.3.1
+For this upgrade, to `casper-node v1.3.1`, the activation point is `Era 1346`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_3_1
+sudo -u casper /etc/casper/config_from_example.sh 1_3_1
+```
+#### Upgrade to casper-node v1.3.2
+For this upgrade, to `casper-node v1.3.2`, the activation point is `Era 1418`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_3_2
+sudo -u casper /etc/casper/config_from_example.sh 1_3_2
+```
+
+#### Upgrade to casper-node v1.3.4
+For this upgrade, to `casper-node v1.3.4`, the activation point is `Era 2005`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_3_4
+sudo -u casper /etc/casper/config_from_example.sh 1_3_4
+```
+
+#### Upgrade to casper-node v1.4.1
+For this upgrade, to `casper-node v1.4.1`, the activation point is `Era 2400`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_1
+sudo -u casper /etc/casper/config_from_example.sh 1_4_1
+```
+
+#### Upgrade to casper-node v1.4.2
+For this upgrade, to `casper-node v1.4.2`, the activation point is `Era 2736`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_2
+sudo -u casper /etc/casper/config_from_example.sh 1_4_2
+```
+
+#### Upgrade to casper-node v1.4.3
+For this upgrade, to `casper-node v1.4.3`, the activation point is `Era 2940`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_3
+sudo -u casper /etc/casper/config_from_example.sh 1_4_3
+```
+
+#### Upgrade to casper-node v1.4.4
+For this upgrade, to `casper-node v1.4.4`, the activation point is `Era 3264`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_4
+sudo -u casper /etc/casper/config_from_example.sh 1_4_4
+```
+
+#### Upgrade to casper-node v1.4.5
+For this upgrade, to `casper-node v1.4.5`, the activation point is `Era 4102`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_5
+sudo -u casper /etc/casper/config_from_example.sh 1_4_5
+```
+
+#### Upgrade to casper-node v1.4.6
+For this upgrade, to `casper-node v1.4.6`, the activation point is `Era 4785`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_6
+sudo -u casper /etc/casper/config_from_example.sh 1_4_6
+```
+
+#### Upgrade to casper-node v1.4.7
+For this upgrade, to `casper-node v1.4.7`, the activation point is `Era 5828`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_7
+sudo -u casper /etc/casper/config_from_example.sh 1_4_7
+```
+
+#### Upgrade to casper-node v1.4.8
+For this upgrade, to `casper-node v1.4.8`, the activation point is `Era 5948`. In order to not have points deducted for your Testnet reward score, you have to make sure you have properly staged the upgrade well ahead of the activation point, so that your node will be upgraded on time.
+
+Execute the following two commands, one by one:
+```
+sudo -u casper /etc/casper/pull_casper_node_version.sh casper-test.conf 1_4_8
+sudo -u casper /etc/casper/config_from_example.sh 1_4_8
 ```
 
 ### Start the node
@@ -322,7 +461,7 @@ sudo -u casper casper-client put-deploy \
     --node-address "http://127.0.0.1:7777/" \
     --secret-key "/etc/casper/validator_keys/secret_key.pem" \
     --session-path "$HOME/casper-node/target/wasm32-unknown-unknown/release/add_bid.wasm" \
-    --payment-amount 3000000000 \
+    --payment-amount 5500000000 \
     --gas-price=1 \
     --session-arg=public_key:"public_key='$PUBLIC_KEY_HEX'" \
     --session-arg=amount:"u512='900000000000'" \
