@@ -32,9 +32,9 @@ Replace ```<DEPLOY_HASH>``` with the deploy hash of the transaction you want to 
 
 ## How do I estimate execution cost?
 
-The ```chainspec.toml``` file contains costs for every function call or operation, as well as memory and space usage. However, it is rather complicated to estimate the cost that way. 
+The ```chainspec.toml``` file lists operation costs, but manual estimation is complex.
 
-Right now, estimation would be done by exercising contracts against the Testnet. Casperlabs team intends to do this exercise for all the important contracts they provide. The results will end up as an addendum to online documentation.
+A better approach is to test contracts on the Testnet or use the [speculative execution endpoint](https://docs.casper.network/developers/dapps/speculative-exec), which simulates contract execution without changing state and returns detailed gas usage. The Casper team also benchmarks key contracts, with results published in the documentation.
 
 ## The setup instructions have `CASPER_VERSION=1_0_0` but the current version on the test net is different (i.e. `1.2.0`). Should I change this value to reflect the latest version and directly install that version?
 No. Do the normal installation for version `1.0.0` up to the `start your node` step, then stage the upgrades in order, one by one, let your node catch up with the network, then do the bonding. (Instructions already cover all of these steps.)
@@ -56,3 +56,18 @@ Yes. You may follow these steps:
   `CHAIN_NAME=$(curl -s http://127.0.0.1:8888/status | jq -r '.chainspec_name')`
 
   `sudo -u casper casper-client put-deploy --secret-key /etc/casper/validator_keys/secret_key.pem --chain-name "$CHAIN_NAME" --session-path ~/casper-node/target/wasm32-unknown-unknown/release/activate_bid.wasm --payment-amount 300000000 --session-arg "validator_public_key:public_key='$(cat /etc/casper/validator_keys/public_key_hex)'"`
+
+## Is this an incentivised Testnet? If so, what are the rules for the reward calculation?
+All information about the reward program is here: [https://docs.cspr.community/docs/testnet-rewards.html](https://docs.cspr.community/docs/testnet-rewards.html)
+
+## Where is the faucet to get Testnet tokens?
+[https://testnet.cspr.live/tools/faucet](https://testnet.cspr.live/tools/faucet)
+
+## I see that some nodes have much more tokens bonded/delegated than what I have on my node. Does it mean they will get more rewards?
+No. Number of tokens on your node or being in top-100 based on the number of tokens on your node doesn’t mean anything for reward calculation. Primary criteria for successful participation is the uptime. See here for more information: [https://docs.cspr.community/docs/testnet-rewards.html](https://docs.cspr.community/docs/testnet-rewards.html)
+
+## How can I make sure my node is perceived as up & running for reward calculation?
+* Go to this address in a browser and take note of the `height` value at the bottom of the page: `http://IP-ADDRESS-OF-YOUR-NODE:8888/status`
+* Now go to this address: `https://testnet.cspr.live/validator/PUBLIC-HASH-OF-YOUR-NODE`
+* Make sure that you see the `ACTIVE` (green) label on your node’s page on testnet.cspr.live, and the `LATEST BLOCK HEIGHT` value at the top of the page is the same as the height value from your node’s status output (you took note of that at the first step). (+-3 difference between these values is okay.)
+

@@ -6,13 +6,9 @@
 
 [include open-ports.md]
 
-[include set-testnet-network-env-vars.md]
+[include open-files-limit.md]
 
 [include setup-validator-from-scratch.md]
-
-[include checkout-release-branch-testnet.md]
-
-[include build-the-contracts.md]
 
 ## Generate keys and fund your account 
 
@@ -29,8 +25,6 @@
 [include ../testnet/fund-testnet-account.md]
 
 [include configure-node.md]
-
-[include stage-upgrade.md]
 
 [include start-node.md]
 

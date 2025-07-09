@@ -1,38 +1,36 @@
 ## Configure and Run the Node
 
-### Set up configuration
+### Configure the node's firewall
+In order to secure your node somewhat from unauthorized/excessive connections/requests, you can configure the firewall of the node using a template ```ufw``` setup:
 
 ```
-sudo -u casper /etc/casper/pull_casper_node_version.sh $CASPER_NETWORK.conf $CASPER_VERSION
-sudo -u casper /etc/casper/config_from_example.sh $CASPER_VERSION
+cd ~; curl -JLO https://genesis.casper.network/firewall_only_node_to_node.sh
+chmod +x ./firewall.sh
+
+# Look at this and make sure you understand what it does and want to run it on your server.
+# You will need to provide `y` to reset and enable steps.
+cat ./firewall.sh
+
+# Install firewall
+sudo ./firewall.sh
 ```
 
-### Get known validator IP
-
-Let's get a known validator IP first. We'll use it multiple times later in the process.
+### Stage all protocol upgrades
 
 ```
-KNOWN_ADDRESSES=$(sudo -u casper cat /etc/casper/$CASPER_VERSION/config.toml | grep known_addresses)
-KNOWN_VALIDATOR_IPS=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' <<< "$KNOWN_ADDRESSES")
-IFS=' ' read -r KNOWN_VALIDATOR_IP _REST <<< "$KNOWN_VALIDATOR_IPS"
-
-echo $KNOWN_VALIDATOR_IP
+sudo -u casper /etc/casper/node_util.py stage_protocols casper-test.conf
 ```
 
-After running the commands above the ```$KNOWN_VALIDATOR_IP``` variable will contain IP address of a known validator.
+The above command will download and stage all available node upgrades to your machine so they are prepped when the node is turned on, and will automatically execute the upgrade and the required time.
 
 ### Set trusted hash
 
-
-> ### Note
-> Setting the `trusted_hash` is only required if you join the network after Genesis has taken place. If you are joining 
-> prior to Genesis, you may skip this step and continue at "Start the node".
-
-Get the trusted hash from the network:
+Set the `trusted_hash` to the hash value of the latest block on Casper TestNet:
 
 ```
-# Get trusted_hash into config.toml
-while read -r KNOWN_VALIDATOR_IP; do TRUSTED_HASH=$(timeout 2 casper-client get-block --node-address http://$KNOWN_VALIDATOR_IP:7777 -b 20 | jq -r .result.block.hash | tr -d '\n'); if [[ ! -z "$TRUSTED_HASH" ]]; then break; fi; done <<< "$KNOWN_VALIDATOR_IPS"
-
-if [ "$TRUSTED_HASH" != "null" ]; then sudo -u casper sed -i "/trusted_hash =/c\trusted_hash = '$TRUSTED_HASH'" /etc/casper/$CASPER_VERSION/config.toml; fi
+NODE_ADDR=https://node.testnet.casper.network/rpc
+PROTOCOL=2_0_1
+sudo sed -i "/trusted_hash =/c\trusted_hash = '$(casper-client get-block --node-address $NODE_ADDR | jq -r .result.block_with_signatures.block.Version2.hash | tr -d '\n')'" /etc/casper/$PROTOCOL/config.toml
 ```
+
+The command above will set the trusted hash on the config file of the `2.0.1` protocol version. Please note that the protocol version should be set to the largest available protocol version you see in `ls /etc/casper`.

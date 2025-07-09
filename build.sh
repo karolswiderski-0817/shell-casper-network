@@ -18,14 +18,13 @@ rm -rf docs/*
 
 #files=($(find src -type f -name '*.md'))
 files=(
-    src/aws/setup-mainnet-validator-from-scratch.md
     src/aws/setup-testnet-validator-from-scratch.md
-    src/ubuntu/setup-mainnet-validator-from-scratch.md
     src/ubuntu/setup-testnet-validator-from-scratch.md
     src/faq-user.md
     src/faq-validator.md
     src/testnet.md
     src/testnet-rewards.md
+    src/testnet/testnet-upgrades.md
     src/testnet/upgrade-1_1_0.md
     src/testnet/upgrade-1_1_2.md
     src/testnet/upgrade-1_2_0.md
@@ -41,11 +40,16 @@ files=(
     src/testnet/upgrade-1_4_6.md
     src/testnet/upgrade-1_4_7.md
     src/testnet/upgrade-1_4_8.md
-    src/user-guides/SignerGuide.md
-    src/user-guides/Connect-a-Wallet.md
-    src/user-guides/Transfer-CSPR.md
-    src/user-guides/Delegating-CSPR-Stake.md
-    src/user-guides/Undelegating-CSPR-Stake.md
+    src/testnet/upgrade-1_4_10.md
+    src/testnet/upgrade-1_4_13.md
+    src/testnet/upgrade-1_4_15.md
+    src/testnet/upgrade-1_5_2.md
+    src/testnet/upgrade-1_5_3.md
+    src/testnet/upgrade-1_5_5.md
+    src/testnet/upgrade-1_5_6.md
+    src/testnet/upgrade-1_5_7.md
+    src/testnet/upgrade-1_5_8.md
+    src/testnet/upgrade-2_0_1.md
 )
 
 for file in ${files[*]}
